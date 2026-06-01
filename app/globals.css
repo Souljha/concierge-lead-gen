@@ -1,0 +1,278 @@
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-crimson: 'Crimson Pro', serif;
+  --font-outfit: 'Outfit', sans-serif;
+}
+
+@layer base {
+  * {
+    @apply border-navy-200;
+  }
+  
+  body {
+    @apply bg-cream-100 text-navy-900 font-sans;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
+
+@layer components {
+  /* Custom Scrollbar */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-cream-200 rounded;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-navy-300 rounded;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-navy-400;
+  }
+
+  /* Card Hover Effect */
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-elegant-lg hover:-translate-y-1;
+  }
+
+  /* Gold Accent Line */
+  .accent-border-gold {
+    @apply border-l-4 border-gold-500 pl-4;
+  }
+
+  /* Glass Morphism Effect */
+  .glass-effect {
+    @apply bg-white/80 backdrop-blur-sm border border-navy-100;
+  }
+
+  /* Elegant Input */
+  .input-elegant {
+    @apply w-full px-4 py-3 rounded-lg border-2 border-navy-200 
+           focus:border-gold-500 focus:ring-2 focus:ring-gold-500/20 
+           transition-all duration-200 bg-white;
+  }
+
+  /* Button Base */
+  .btn-base {
+    @apply px-6 py-3 rounded-lg font-medium transition-all duration-200 
+           focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+
+  /* Button Primary */
+  .btn-primary {
+    @apply btn-base bg-navy-900 text-white hover:bg-navy-800 
+           focus:ring-navy-500 shadow-elegant hover:shadow-elegant-lg;
+  }
+
+  /* Button Secondary */
+  .btn-secondary {
+    @apply btn-base bg-gold-500 text-navy-900 hover:bg-gold-600 
+           focus:ring-gold-400 shadow-elegant hover:shadow-elegant-lg;
+  }
+
+  /* Button Outline */
+  .btn-outline {
+    @apply btn-base border-2 border-navy-900 text-navy-900 hover:bg-navy-900 
+           hover:text-white focus:ring-navy-500;
+  }
+
+  /* Button Ghost */
+  .btn-ghost {
+    @apply btn-base text-navy-700 hover:bg-navy-50 focus:ring-navy-300;
+  }
+
+  /* Button Danger */
+  .btn-danger {
+    @apply btn-base bg-red-600 text-white hover:bg-red-700 
+           focus:ring-red-500 shadow-elegant;
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
+  }
+
+  /* Status Badge */
+  .status-badge {
+    @apply badge border;
+  }
+
+  /* Progress Bar Container */
+  .progress-bar-container {
+    @apply w-full h-3 bg-navy-100 rounded-full overflow-hidden;
+  }
+
+  /* Progress Bar Fill */
+  .progress-bar-fill {
+    @apply h-full transition-all duration-500 ease-out rounded-full;
+  }
+
+  /* Document Card */
+  .document-card {
+    @apply p-6 rounded-xl border-2 border-navy-200 bg-white 
+           transition-all duration-300 hover:border-gold-500 
+           hover:shadow-elegant;
+  }
+
+  /* Upload Zone */
+  .upload-zone {
+    @apply border-2 border-dashed border-navy-300 rounded-xl p-8 
+           text-center cursor-pointer transition-all duration-300
+           hover:border-gold-500 hover:bg-gold-50/30;
+  }
+
+  .upload-zone-active {
+    @apply border-gold-500 bg-gold-50/50;
+  }
+
+  /* Section Header */
+  .section-header {
+    @apply text-3xl md:text-4xl font-serif font-bold text-navy-900 mb-4;
+  }
+
+  /* Card Title */
+  .card-title {
+    @apply text-xl font-serif font-semibold text-navy-900;
+  }
+
+  /* Text Muted */
+  .text-muted {
+    @apply text-navy-600 text-sm;
+  }
+}
+
+@layer utilities {
+  /* Animation Delays */
+  .animation-delay-100 {
+    animation-delay: 100ms;
+  }
+  
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+  
+  .animation-delay-300 {
+    animation-delay: 300ms;
+  }
+  
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+
+  .animation-delay-500 {
+    animation-delay: 500ms;
+  }
+
+  /* Text Gradient */
+  .text-gradient-gold {
+    @apply bg-gradient-to-r from-gold-600 to-gold-400 bg-clip-text text-transparent;
+  }
+
+  /* Background Patterns */
+  .bg-pattern-dots {
+    background-image: radial-gradient(circle, rgba(26, 35, 50, 0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  .bg-pattern-grid {
+    background-image: 
+      linear-gradient(rgba(26, 35, 50, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(26, 35, 50, 0.05) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+
+  /* Shadows */
+  .shadow-elegant-inset {
+    box-shadow: inset 0 2px 4px rgba(26, 35, 50, 0.06);
+  }
+}
+
+/* Loading Spinner */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  @apply border-2 border-navy-200 border-t-gold-500 rounded-full;
+  animation: spin 0.6s linear infinite;
+}
+
+/* Shimmer Loading Effect */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0px,
+    #e0e0e0 40px,
+    #f0f0f0 80px
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Notification Slide In */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.notification-enter {
+  animation: slideInRight 0.3s ease-out;
+}
+
+/* Tooltip */
+.tooltip {
+  @apply absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 
+         px-3 py-2 bg-navy-900 text-white text-xs rounded-lg whitespace-nowrap
+         opacity-0 pointer-events-none transition-opacity duration-200;
+}
+
+.tooltip-trigger:hover .tooltip {
+  @apply opacity-100;
+}
+
+/* Print Styles */
+@media print {
+  body {
+    @apply bg-white text-black;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Responsive Typography */
+@media (max-width: 640px) {
+  .section-header {
+    @apply text-2xl;
+  }
+}
