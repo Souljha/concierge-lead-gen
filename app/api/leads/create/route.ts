@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
       if (userError || !newUser) {
         console.error('Error creating user:', userError);
         return NextResponse.json<ApiResponse>(
-          { success: false, error: 'Failed to create user' },
+          { success: false, error: `Failed to create user: ${userError?.message} (code: ${userError?.code})` },
           { status: 500 }
         );
       }
