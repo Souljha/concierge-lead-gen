@@ -4,12 +4,8 @@ const nextConfig = {
   images: {
     domains: [
       'localhost',
-      // Add your Supabase project domain here
-      // e.g., 'youproject.supabase.co'
+      'pldhxbwlvgntpopaliwc.supabase.co',
     ],
-  },
-  experimental: {
-    serverActions: true,
   },
 }
 
