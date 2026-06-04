@@ -7,33 +7,48 @@ export async function GET() {
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   const envCheck = {
-    NEXT_PUBLIC_SUPABASE_URL: supabaseUrl ? `set (${supabaseUrl.substring(0, 40)}...)` : 'MISSING',
+    NEXT_PUBLIC_SUPABASE_URL: supabaseUrl ? `set (${supabaseUrl.substring(0, 45)}...)` : 'MISSING',
     NEXT_PUBLIC_SUPABASE_ANON_KEY: anonKey ? `set (${anonKey.substring(0, 20)}...)` : 'MISSING',
     SUPABASE_SERVICE_ROLE_KEY: serviceKey ? `set (${serviceKey.substring(0, 20)}...)` : 'MISSING',
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'MISSING',
   };
 
-  // Test Supabase connection
+  // Test 1: raw fetch to Supabase REST base URL (no auth needed)
+  let rawFetchStatus = 'untested';
+  let rawFetchError = null;
+  if (supabaseUrl) {
+    try {
+      const res = await fetch(`${supabaseUrl}/rest/v1/`, {
+        headers: { apikey: anonKey || '', Authorization: `Bearer ${anonKey || ''}` },
+        signal: AbortSignal.timeout(8000),
+      });
+      rawFetchStatus = `http_${res.status}`;
+    } catch (e: unknown) {
+      rawFetchStatus = 'failed';
+      rawFetchError = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
+    }
+  }
+
+  // Test 2: supabase-js client query
   let dbStatus = 'untested';
   let dbError = null;
-
   if (supabaseUrl && serviceKey) {
     try {
       const supabase = createClient(supabaseUrl, serviceKey);
       const { error } = await supabase.from('users').select('id').limit(1);
-      dbStatus = error ? 'error' : 'connected';
-      dbError = error ? error.message : null;
+      dbStatus = error ? `postgrest_error: ${error.code}` : 'connected';
+      dbError = error ? `${error.message} | hint: ${error.hint} | details: ${error.details}` : null;
     } catch (e: unknown) {
-      dbStatus = 'fetch_failed';
-      dbError = e instanceof Error ? e.message : String(e);
+      dbStatus = 'exception';
+      dbError = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
     }
-  } else {
-    dbStatus = 'skipped_missing_env';
   }
 
   return NextResponse.json({
     ok: dbStatus === 'connected',
+    nodeVersion: process.version,
     env: envCheck,
+    rawFetch: { status: rawFetchStatus, error: rawFetchError },
     db: { status: dbStatus, error: dbError },
   });
 }
