@@ -349,7 +349,7 @@ export default function LandingPage() {
               © 2026 Ficavault. All rights reserved.
             </p>
             <p className="text-xs mt-2">
-              Questions? Contact us at <a href="mailto:support@yourfirm.com" className="text-gold-600 hover:underline">support@yourfirm.com</a>
+              Questions? Contact us at <a href="mailto:support@ficavault.co.za" className="text-gold-600 hover:underline">support@ficavault.co.za</a>
             </p>
           </div>
         </div>
