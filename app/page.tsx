@@ -65,8 +65,9 @@ export default function LandingPage() {
       {/* Navigation Header */}
       <header className="bg-navy-900/95 backdrop-blur-sm sticky top-0 z-50">
         <nav className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold text-white">
-            Concierge
+          <Link href="/" className="flex items-center gap-2 text-xl font-bold text-white">
+            <Shield className="w-6 h-6 text-gold-400" />
+            Ficavault
           </Link>
           <div className="flex items-center gap-6">
             <Link href="/pricing" className="text-navy-200 hover:text-white transition-colors">
@@ -345,7 +346,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center text-navy-600">
             <p className="text-sm">
-              © 2024 Your Financial Advisory Firm. All rights reserved.
+              © 2026 Ficavault. All rights reserved.
             </p>
             <p className="text-xs mt-2">
               Questions? Contact us at <a href="mailto:support@yourfirm.com" className="text-gold-600 hover:underline">support@yourfirm.com</a>
