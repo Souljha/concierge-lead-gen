@@ -17,9 +17,11 @@ import {
   Clock,
   ChevronRight,
   Briefcase,
-  LogOut
+  LogOut,
+  FileDown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { generateCoverSheet } from '@/lib/pdf/coverSheet';
 
 interface Client {
   id: string;
@@ -281,6 +283,14 @@ export default function AdvisorClientsPage() {
                       View Profile
                     </button>
                     <button
+                      onClick={() => generateCoverSheet(client)}
+                      title="Download Cover Sheet PDF"
+                      className="px-4 py-2 bg-gold-500 text-white text-sm rounded-lg hover:bg-gold-600 transition-colors flex items-center justify-center"
+                      style={{ backgroundColor: '#C9A227' }}
+                    >
+                      <FileDown className="w-4 h-4" />
+                    </button>
+                    <button
                       onClick={() => handleDownloadDocuments(client.id)}
                       disabled={downloadingClient === client.id}
                       className="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50"
@@ -386,9 +396,15 @@ export default function AdvisorClientsPage() {
                 Send Email
               </a>
               <button
-                onClick={() => {
-                  handleDownloadDocuments(selectedClient.id);
-                }}
+                onClick={() => generateCoverSheet(selectedClient)}
+                className="px-6 py-3 text-white rounded-lg transition-colors font-medium flex items-center gap-2"
+                style={{ backgroundColor: '#C9A227' }}
+              >
+                <FileDown className="w-5 h-5" />
+                Cover Sheet
+              </button>
+              <button
+                onClick={() => handleDownloadDocuments(selectedClient.id)}
                 className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium flex items-center gap-2"
               >
                 <Download className="w-5 h-5" />
