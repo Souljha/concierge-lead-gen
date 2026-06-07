@@ -162,8 +162,9 @@ export default function PricingPage() {
       {/* Header */}
       <header className="bg-navy-900 text-white">
         <nav className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold">
-            Concierge
+          <Link href="/" className="flex items-center gap-2 text-xl font-bold">
+            <Shield className="w-6 h-6 text-gold-400" />
+            Ficavault
           </Link>
           <div className="flex items-center gap-6">
             <Link href="/" className="text-navy-200 hover:text-white transition-colors">
@@ -226,6 +227,9 @@ export default function PricingPage() {
                 </span>
               </button>
             </div>
+            <p className="text-sm text-navy-500 mt-4">
+              Billed in USD. South African advisors pay via Paystack — no foreign transaction fees.
+            </p>
           </div>
         </section>
 
@@ -363,7 +367,7 @@ export default function PricingPage() {
               Ready to Transform Your Client Onboarding?
             </h2>
             <p className="text-xl text-navy-200 mb-8">
-              Join hundreds of financial advisors who have streamlined their practice with Concierge.
+              Join hundreds of financial advisors who have streamlined their practice with Ficavault.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
@@ -387,7 +391,7 @@ export default function PricingPage() {
       {/* Footer */}
       <footer className="py-12 bg-white border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-4 text-center text-gray-600">
-          <p>&copy; 2024 Concierge Lead Management. All rights reserved.</p>
+          <p>&copy; 2026 Ficavault. All rights reserved.</p>
         </div>
       </footer>
 
