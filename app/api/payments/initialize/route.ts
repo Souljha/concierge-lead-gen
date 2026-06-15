@@ -11,10 +11,11 @@ const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 
 export async function POST(req: NextRequest) {
   try {
-    const { plan, billingCycle, email, metadata } = await req.json() as {
+    const { plan, billingCycle, email, firm_id, metadata } = await req.json() as {
       plan: SubscriptionPlan;
       billingCycle: BillingCycle;
       email: string;
+      firm_id?: string;
       metadata?: Record<string, any>;
     };
 
@@ -69,6 +70,7 @@ export async function POST(req: NextRequest) {
           plan,
           billing_cycle: billingCycle,
           plan_name: planData.name,
+          ...(firm_id && { firm_id }),
           ...metadata,
         },
         channels: ['card', 'bank', 'ussd', 'bank_transfer'],

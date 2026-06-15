@@ -77,10 +77,10 @@ export default function LandingPage() {
               Staff Login
             </Link>
             <Link
-              href="/admin/dashboard"
+              href="/signup"
               className="px-4 py-2 bg-gold-500 text-navy-900 rounded-lg font-medium hover:bg-gold-400 transition-colors"
             >
-              Dashboard
+              For Advisors
             </Link>
           </div>
         </nav>

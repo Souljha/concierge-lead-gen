@@ -1,9 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   Check,
+  CheckCircle,
   Star,
   Zap,
   Shield,
@@ -101,12 +103,22 @@ const pricingTiers: PricingTier[] = [
 ];
 
 export default function PricingPage() {
+  const searchParams = useSearchParams();
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('annual');
   const [loading, setLoading] = useState<string | null>(null);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
   const [email, setEmail] = useState('');
+  const [firmId, setFirmId] = useState<string | null>(null);
   const [error, setError] = useState('');
+  const [fromSignup, setFromSignup] = useState(false);
+
+  useEffect(() => {
+    const paramFirmId = searchParams.get('firm_id');
+    const paramEmail = searchParams.get('email');
+    if (paramFirmId) { setFirmId(paramFirmId); setFromSignup(true); }
+    if (paramEmail) setEmail(decodeURIComponent(paramEmail));
+  }, [searchParams]);
 
   const handleStartCheckout = (plan: SubscriptionPlan) => {
     if (plan === 'enterprise') {
@@ -140,6 +152,7 @@ export default function PricingPage() {
           plan: selectedPlan,
           billingCycle,
           email,
+          ...(firmId && { firm_id: firmId }),
         }),
       });
 
@@ -184,6 +197,19 @@ export default function PricingPage() {
       </header>
 
       <main>
+        {/* Post-signup success banner */}
+        {fromSignup && (
+          <div className="bg-green-50 border-b border-green-200">
+            <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-3 text-green-800">
+              <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+              <p className="text-sm font-medium">
+                Your firm vault has been created — your 14-day free trial has started.
+                Choose a plan below to activate your subscription.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Hero Section */}
         <section className="py-20 text-center">
           <div className="max-w-4xl mx-auto px-4">
