@@ -10,13 +10,14 @@ const supabaseAdmin = createClient(
 
 const SESSION_COOKIE = 'auth-session';
 const SESSION_MAX_AGE = 60 * 60 * 8; // 8 hours
+const DEFAULT_FIRM_ID = '00000000-0000-0000-0000-000000000001';
 
 const DEMO_USERS = [
-  { email: 'admin@demo.com', password: 'admin123', role: 'admin', name: 'Demo Admin' },
-  { email: 'advisor@demo.com', password: 'advisor123', role: 'advisor', name: 'Demo Advisor' },
+  { email: 'admin@demo.com', password: 'admin123', role: 'admin', name: 'Demo Admin', firm_id: DEFAULT_FIRM_ID },
+  { email: 'advisor@demo.com', password: 'advisor123', role: 'advisor', name: 'Demo Advisor', firm_id: DEFAULT_FIRM_ID },
 ];
 
-function buildSessionCookie(data: { id: string; email: string; name: string; role: string }): string {
+function buildSessionCookie(data: { id: string; email: string; name: string; role: string; firm_id?: string }): string {
   const secret = process.env.SUPABASE_SERVICE_ROLE_KEY!;
   const payload = Buffer.from(JSON.stringify(data)).toString('base64url');
   const sig = createHmac('sha256', secret).update(payload).digest('hex');
@@ -54,7 +55,7 @@ export async function POST(req: NextRequest) {
 
       const { data: existingUser } = await supabaseAdmin
         .from('users')
-        .select('id, role')
+        .select('id, role, firm_id')
         .eq('email', demoUser.email)
         .single();
 
@@ -65,6 +66,7 @@ export async function POST(req: NextRequest) {
             email: demoUser.email,
             full_name: demoUser.name,
             role: demoUser.role,
+            firm_id: DEFAULT_FIRM_ID,
           })
           .select('id')
           .single();
@@ -77,7 +79,13 @@ export async function POST(req: NextRequest) {
         userId = existingUser.id;
       }
 
-      const sessionData = { id: userId ?? '', email: demoUser.email, name: demoUser.name, role: demoUser.role };
+      const sessionData = {
+        id: userId ?? '',
+        email: demoUser.email,
+        name: demoUser.name,
+        role: demoUser.role,
+        firm_id: demoUser.firm_id,
+      };
       const response = NextResponse.json<ApiResponse>({ success: true, data: sessionData });
       setSessionCookie(response, buildSessionCookie(sessionData));
       return response;
@@ -86,7 +94,7 @@ export async function POST(req: NextRequest) {
     // Check database users (admin/advisor roles only)
     const { data: user, error } = await supabaseAdmin
       .from('users')
-      .select('id, email, full_name, role')
+      .select('id, email, full_name, role, firm_id')
       .eq('email', email)
       .in('role', ['admin', 'advisor'])
       .single();
@@ -103,7 +111,13 @@ export async function POST(req: NextRequest) {
       .update({ last_login_at: new Date().toISOString() })
       .eq('id', user.id);
 
-    const sessionData = { id: user.id, email: user.email, name: user.full_name, role: user.role };
+    const sessionData = {
+      id: user.id,
+      email: user.email,
+      name: user.full_name,
+      role: user.role,
+      firm_id: user.firm_id ?? DEFAULT_FIRM_ID,
+    };
     const response = NextResponse.json<ApiResponse>({ success: true, data: sessionData });
     setSessionCookie(response, buildSessionCookie(sessionData));
     return response;

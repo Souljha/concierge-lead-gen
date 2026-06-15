@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { ApiResponse } from '@/types';
+import { getSessionFromRequest } from '@/lib/auth/session';
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -11,8 +12,41 @@ export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const session = getSessionFromRequest(req);
+  if (!session || (session.role !== 'advisor' && session.role !== 'admin')) {
+    return NextResponse.json<ApiResponse>({ success: false, error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const firmId = session.firm_id ?? '00000000-0000-0000-0000-000000000001';
+
   try {
     const leadId = params.id;
+
+    // Verify the lead belongs to this firm and is assigned to this advisor (if advisor role)
+    const leadQuery = supabaseAdmin
+      .from('leads')
+      .select('id, assigned_advisor_id, firm_id')
+      .eq('id', leadId)
+      .eq('firm_id', firmId)
+      .eq('status', 'approved')
+      .single();
+
+    const { data: lead, error: leadError } = await leadQuery;
+
+    if (leadError || !lead) {
+      return NextResponse.json<ApiResponse>(
+        { success: false, error: 'Client not found' },
+        { status: 404 }
+      );
+    }
+
+    // Advisors can only download their own assigned clients
+    if (session.role === 'advisor' && lead.assigned_advisor_id !== session.id) {
+      return NextResponse.json<ApiResponse>(
+        { success: false, error: 'Access denied' },
+        { status: 403 }
+      );
+    }
 
     // Get all approved documents for this lead
     const { data: documents, error: docsError } = await supabaseAdmin

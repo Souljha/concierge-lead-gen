@@ -61,7 +61,7 @@ export async function middleware(request: NextRequest) {
   }
 
   if (pathname.startsWith('/advisor')) {
-    if (!session || session.role !== 'advisor') {
+    if (!session || (session.role !== 'advisor' && session.role !== 'admin')) {
       const loginUrl = new URL('/login', request.url);
       loginUrl.searchParams.set('from', pathname);
       return NextResponse.redirect(loginUrl);

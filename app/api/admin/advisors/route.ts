@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { ApiResponse } from '@/types';
+import { requireAdminSession } from '@/lib/auth/session';
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -8,11 +9,19 @@ const supabaseAdmin = createClient(
 );
 
 export async function GET(req: NextRequest) {
+  const session = requireAdminSession(req);
+  if (!session) {
+    return NextResponse.json<ApiResponse>({ success: false, error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const firmId = session.firm_id ?? '00000000-0000-0000-0000-000000000001';
+
   try {
     const { data: advisors, error } = await supabaseAdmin
       .from('users')
       .select('id, full_name, email')
       .eq('role', 'advisor')
+      .eq('firm_id', firmId)
       .eq('is_active', true)
       .order('full_name', { ascending: true });
 

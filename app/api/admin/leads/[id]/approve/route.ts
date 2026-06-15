@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 import { ApiResponse } from '@/types';
+import { requireAdminSession } from '@/lib/auth/session';
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -14,6 +15,13 @@ export async function POST(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const session = requireAdminSession(req);
+  if (!session) {
+    return NextResponse.json<ApiResponse>({ success: false, error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const firmId = session.firm_id ?? '00000000-0000-0000-0000-000000000001';
+
   try {
     const leadId = params.id;
     const { advisor_id } = await req.json();
@@ -25,7 +33,7 @@ export async function POST(
       );
     }
 
-    // Get lead and user info
+    // Get lead and user info (scoped to firm)
     const { data: lead, error: leadError } = await supabaseAdmin
       .from('leads')
       .select(`
@@ -36,6 +44,7 @@ export async function POST(
         )
       `)
       .eq('id', leadId)
+      .eq('firm_id', firmId)
       .single();
 
     if (leadError || !lead) {
@@ -45,11 +54,12 @@ export async function POST(
       );
     }
 
-    // Get advisor info
+    // Get advisor info (must belong to same firm)
     const { data: advisor, error: advisorError } = await supabaseAdmin
       .from('users')
       .select('full_name, email')
       .eq('id', advisor_id)
+      .eq('firm_id', firmId)
       .single();
 
     if (advisorError || !advisor) {
@@ -80,6 +90,7 @@ export async function POST(
     // Create notification for advisor
     await supabaseAdmin.from('notifications').insert({
       user_id: advisor_id,
+      firm_id: firmId,
       type: 'lead_assigned',
       title: 'New Client Assigned',
       message: `${lead.user.full_name} has been assigned to you.`,
@@ -92,6 +103,7 @@ export async function POST(
       action: 'lead_approved',
       entity_type: 'lead',
       entity_id: leadId,
+      firm_id: firmId,
       metadata: {
         advisor_id,
         advisor_name: advisor.full_name,

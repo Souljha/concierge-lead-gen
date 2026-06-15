@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { ApiResponse } from '@/types';
+import { requireAdminSession } from '@/lib/auth/session';
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -11,6 +12,13 @@ export async function POST(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const session = requireAdminSession(req);
+  if (!session) {
+    return NextResponse.json<ApiResponse>({ success: false, error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const firmId = session.firm_id ?? '00000000-0000-0000-0000-000000000001';
+
   try {
     const documentId = params.id;
     const { action, reason } = await req.json();
@@ -29,11 +37,12 @@ export async function POST(
       );
     }
 
-    // Get document info
+    // Get document info (scoped to firm via lead's firm_id)
     const { data: document, error: docError } = await supabaseAdmin
       .from('documents')
-      .select('*, lead_id')
+      .select('*, lead_id, firm_id, document_type')
       .eq('id', documentId)
+      .eq('firm_id', firmId)
       .single();
 
     if (docError || !document) {
@@ -44,7 +53,7 @@ export async function POST(
     }
 
     // Update document status
-    const updateData: any = {
+    const updateData: Record<string, unknown> = {
       status: action === 'approve' ? 'approved' : 'rejected',
       reviewed_at: new Date().toISOString(),
     };
@@ -94,6 +103,7 @@ export async function POST(
       action: action === 'approve' ? 'document_approved' : 'document_rejected',
       entity_type: 'document',
       entity_id: documentId,
+      firm_id: firmId,
       metadata: {
         document_type: document.document_type,
         rejection_reason: reason || null,

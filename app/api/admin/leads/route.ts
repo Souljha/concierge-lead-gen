@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { ApiResponse } from '@/types';
+import { requireAdminSession } from '@/lib/auth/session';
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -8,10 +9,16 @@ const supabaseAdmin = createClient(
 );
 
 export async function GET(req: NextRequest) {
+  const session = requireAdminSession(req);
+  if (!session) {
+    return NextResponse.json<ApiResponse>({ success: false, error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const firmId = session.firm_id ?? '00000000-0000-0000-0000-000000000001';
+
   try {
     const status = req.nextUrl.searchParams.get('status');
 
-    // Build the query
     let query = supabaseAdmin
       .from('leads')
       .select(`
@@ -25,9 +32,9 @@ export async function GET(req: NextRequest) {
           email
         )
       `)
+      .eq('firm_id', firmId)
       .order('created_at', { ascending: false });
 
-    // Apply status filter if provided
     if (status && status !== 'all') {
       query = query.eq('status', status);
     }
@@ -63,7 +70,6 @@ export async function GET(req: NextRequest) {
       })
     );
 
-    // Calculate stats
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 

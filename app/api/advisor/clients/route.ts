@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { ApiResponse } from '@/types';
+import { getSessionFromRequest } from '@/lib/auth/session';
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -8,10 +9,15 @@ const supabaseAdmin = createClient(
 );
 
 export async function GET(req: NextRequest) {
+  const session = getSessionFromRequest(req);
+  if (!session || (session.role !== 'advisor' && session.role !== 'admin')) {
+    return NextResponse.json<ApiResponse>({ success: false, error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const firmId = session.firm_id ?? '00000000-0000-0000-0000-000000000001';
+
   try {
-    // For now, get all approved leads
-    // In production, filter by the logged-in advisor's ID
-    const { data: leads, error: leadsError } = await supabaseAdmin
+    let query = supabaseAdmin
       .from('leads')
       .select(`
         id,
@@ -26,7 +32,15 @@ export async function GET(req: NextRequest) {
         )
       `)
       .eq('status', 'approved')
+      .eq('firm_id', firmId)
       .order('approved_at', { ascending: false });
+
+    // Advisors only see clients assigned to them; admins see all firm clients
+    if (session.role === 'advisor') {
+      query = query.eq('assigned_advisor_id', session.id);
+    }
+
+    const { data: leads, error: leadsError } = await query;
 
     if (leadsError) {
       console.error('Error fetching clients:', leadsError);
