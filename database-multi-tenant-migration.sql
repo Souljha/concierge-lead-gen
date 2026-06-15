@@ -123,33 +123,56 @@ CREATE INDEX IF NOT EXISTS idx_audit_logs_firm_id ON audit_logs(firm_id);
 
 -- =====================================================
 -- 4. MOVE BILLING FROM USER-LEVEL TO FIRM-LEVEL
---    Existing `subscriptions` table is user-scoped;
---    add firm_id so it can eventually be firm-scoped.
+--    Wrapped in DO blocks so the migration succeeds even
+--    if database-subscriptions.sql has not been run yet.
 -- =====================================================
 
-ALTER TABLE subscriptions
-  ADD COLUMN IF NOT EXISTS firm_id UUID REFERENCES firms(id) ON DELETE CASCADE;
+DO $$
+BEGIN
+  -- subscriptions table
+  IF EXISTS (
+    SELECT FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'subscriptions'
+  ) THEN
+    IF NOT EXISTS (
+      SELECT FROM information_schema.columns
+      WHERE table_name = 'subscriptions' AND column_name = 'firm_id'
+    ) THEN
+      ALTER TABLE subscriptions
+        ADD COLUMN firm_id UUID REFERENCES firms(id) ON DELETE CASCADE;
+    END IF;
 
--- Backfill via the user's firm
-UPDATE subscriptions s
-SET firm_id = u.firm_id
-FROM users u
-WHERE s.user_id = u.id
-  AND s.firm_id IS NULL;
+    UPDATE subscriptions s
+    SET firm_id = u.firm_id
+    FROM users u
+    WHERE s.user_id = u.id
+      AND s.firm_id IS NULL;
 
-CREATE INDEX IF NOT EXISTS idx_subscriptions_firm_id ON subscriptions(firm_id);
+    CREATE INDEX IF NOT EXISTS idx_subscriptions_firm_id ON subscriptions(firm_id);
+  END IF;
 
--- Same for payment_history
-ALTER TABLE payment_history
-  ADD COLUMN IF NOT EXISTS firm_id UUID REFERENCES firms(id) ON DELETE SET NULL;
+  -- payment_history table
+  IF EXISTS (
+    SELECT FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'payment_history'
+  ) THEN
+    IF NOT EXISTS (
+      SELECT FROM information_schema.columns
+      WHERE table_name = 'payment_history' AND column_name = 'firm_id'
+    ) THEN
+      ALTER TABLE payment_history
+        ADD COLUMN firm_id UUID REFERENCES firms(id) ON DELETE SET NULL;
+    END IF;
 
-UPDATE payment_history ph
-SET firm_id = u.firm_id
-FROM users u
-WHERE ph.user_id = u.id
-  AND ph.firm_id IS NULL;
+    UPDATE payment_history ph
+    SET firm_id = u.firm_id
+    FROM users u
+    WHERE ph.user_id = u.id
+      AND ph.firm_id IS NULL;
 
-CREATE INDEX IF NOT EXISTS idx_payment_history_firm_id ON payment_history(firm_id);
+    CREATE INDEX IF NOT EXISTS idx_payment_history_firm_id ON payment_history(firm_id);
+  END IF;
+END $$;
 
 
 -- =====================================================
