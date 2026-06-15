@@ -3,6 +3,7 @@
 // =====================================================
 
 export type UserRole = 'lead' | 'admin' | 'advisor';
+export type FirmSubscriptionStatus = 'trial' | 'active' | 'past_due' | 'cancelled';
 
 export type LeadGoal = 
   | 'retirement' 
@@ -47,8 +48,26 @@ export type NotificationType =
 // DATABASE MODELS
 // =====================================================
 
+export interface Firm {
+  id: string;
+  name: string;
+  slug: string;
+  owner_email?: string;
+  subscription_status: FirmSubscriptionStatus;
+  subscription_plan?: SubscriptionPlan;
+  paystack_subscription_code?: string;
+  paystack_customer_code?: string;
+  trial_ends_at?: string;
+  subscribed_at?: string;
+  cancelled_at?: string;
+  brand_name?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface User {
   id: string;
+  firm_id?: string;
   email: string;
   full_name: string;
   role: UserRole;
@@ -62,6 +81,7 @@ export interface User {
 
 export interface Lead {
   id: string;
+  firm_id?: string;
   user_id: string;
   goal: LeadGoal;
   phone?: string;
@@ -77,6 +97,7 @@ export interface Lead {
 
 export interface Document {
   id: string;
+  firm_id?: string;
   lead_id: string;
   document_type: DocumentType;
   file_name: string;
@@ -106,6 +127,7 @@ export interface DocumentTemplate {
 
 export interface Notification {
   id: string;
+  firm_id?: string;
   user_id: string;
   type: NotificationType;
   title: string;
@@ -118,6 +140,7 @@ export interface Notification {
 
 export interface AuditLog {
   id: string;
+  firm_id?: string;
   user_id?: string;
   action: string;
   entity_type: string;
@@ -176,6 +199,15 @@ export interface CreateLeadRequest {
   full_name: string;
   phone?: string;
   goal: LeadGoal;
+  firm_id?: string;
+}
+
+export interface CreateFirmRequest {
+  name: string;
+  slug: string;
+  owner_email: string;
+  owner_name: string;
+  plan?: SubscriptionPlan;
 }
 
 // =====================================================

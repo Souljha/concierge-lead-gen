@@ -13,10 +13,15 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+// Deployment-level firm: set NEXT_PUBLIC_FIRM_ID in Vercel env vars per firm deployment.
+// Falls back to the seed default firm so single-firm deploys keep working.
+const DEFAULT_FIRM_ID =
+  process.env.NEXT_PUBLIC_FIRM_ID ?? '00000000-0000-0000-0000-000000000001';
+
 export async function POST(req: NextRequest) {
   try {
     const body: CreateLeadRequest = await req.json();
-    const { email, full_name, phone, goal } = body;
+    const { email, full_name, phone, goal, firm_id = DEFAULT_FIRM_ID } = body;
 
     // Validation
     if (!email || !full_name || !goal) {
@@ -53,6 +58,7 @@ export async function POST(req: NextRequest) {
           full_name,
           phone,
           role: 'lead',
+          firm_id,
         })
         .select()
         .single();
@@ -73,6 +79,7 @@ export async function POST(req: NextRequest) {
       .from('leads')
       .insert({
         user_id: userId,
+        firm_id,
         goal,
         phone,
         status: 'pending_documents',
@@ -116,6 +123,7 @@ export async function POST(req: NextRequest) {
 
     // Create audit log
     await supabaseAdmin.from('audit_logs').insert({
+      firm_id,
       user_id: userId,
       action: 'lead_created',
       entity_type: 'lead',

@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     // Verify the lead and token
     const { data: lead, error: leadError } = await supabaseAdmin
       .from('leads')
-      .select('id, notes, goal')
+      .select('id, notes, goal, firm_id')
       .eq('id', leadId)
       .single();
 
@@ -71,10 +71,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Generate unique file path
+    // Generate unique file path scoped to firm for isolation
     const timestamp = Date.now();
     const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-    const filePath = `${leadId}/${documentType}_${timestamp}_${sanitizedFileName}`;
+    const firmPrefix = lead.firm_id ?? 'default';
+    const filePath = `${firmPrefix}/${leadId}/${documentType}_${timestamp}_${sanitizedFileName}`;
 
     // Convert File to Buffer for upload
     const arrayBuffer = await file.arrayBuffer();
@@ -124,6 +125,7 @@ export async function POST(req: NextRequest) {
       .from('documents')
       .insert({
         lead_id: leadId,
+        firm_id: lead.firm_id,
         document_type: documentType,
         file_name: file.name,
         file_path: filePath,
