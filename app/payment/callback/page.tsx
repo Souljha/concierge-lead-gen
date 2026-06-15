@@ -104,7 +104,7 @@ export default function PaymentCallbackPage() {
             </h1>
 
             <p className="text-navy-600 mb-6">
-              Welcome to Concierge! Your subscription is now active.
+              Welcome to Ficavault! Your subscription is now active.
             </p>
 
             <div className="bg-navy-50 rounded-lg p-4 mb-6 text-left">
@@ -185,8 +185,8 @@ export default function PaymentCallbackPage() {
 
               <p className="text-sm text-navy-500">
                 Need help? Contact{' '}
-                <a href="mailto:support@yourfirm.com" className="text-gold-600 hover:underline">
-                  support@yourfirm.com
+                <a href="mailto:support@ficavault.co.za" className="text-gold-600 hover:underline">
+                  support@ficavault.co.za
                 </a>
               </p>
             </div>
